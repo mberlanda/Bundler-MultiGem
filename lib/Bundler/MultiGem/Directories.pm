@@ -16,6 +16,10 @@ Version 0.01
 
 our $VERSION = '0.01';
 
+use Exporter qw(import);
+our @EXPORT = qw()
+
+use File::Path qw( make_path remove_tree );
 
 =head1 SYNOPSIS
 
@@ -35,18 +39,26 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
+=head2 make_dir
 
 =cut
 
-sub function1 {
+sub mk_dir {
+  my $dir = shift;
+  if ( !-d $dir ) {
+    make_path $dir or die "Failed to create path: $dir";
+  }
 }
 
-=head2 function2
+=head2 rm_dir
 
 =cut
 
-sub function2 {
+sub rm_dir {
+  my $dir = shift;
+  if ( -d $dir ) {
+    remove_tree $dir or die "Failed to remove path: $dir";
+  }
 }
 
 =head1 AUTHOR
