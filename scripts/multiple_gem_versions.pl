@@ -30,3 +30,17 @@ print join(', ', @{$gem->{versions}}) . "\n";
 
 my $gemspec = $gem->{name} . ".gemspec";
 print $gemspec . "\n";
+
+sub reset_dir {
+  my $directory = shift;
+  if ( -d $directory ) {
+    remove_tree $directory or die "Failed to remove path: $directory";
+  }
+  make_path $directory;
+}
+
+sub main {
+  reset_dir $pkg_dir
+}
+
+main;
