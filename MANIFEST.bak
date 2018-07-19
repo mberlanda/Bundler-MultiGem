@@ -1,7 +1,6 @@
 Build.PL
 Changes
 lib/Bundler/MultiGem.pm
-lib/Bundler/MultiGem/Directories.pm
 MANIFEST			This list of files
 README
 t/00-load.t
