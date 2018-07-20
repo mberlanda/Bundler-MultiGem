@@ -5,6 +5,7 @@ use warnings;
 
 use Cwd qw(cwd);
 use File::Path qw( make_path remove_tree );
+use File::Copy qw(move);
 
 # Directories
 my $root_path = cwd();
@@ -31,6 +32,8 @@ print join(', ', @{$gem->{versions}}) . "\n";
 my $gemspec = $gem->{name} . ".gemspec";
 print $gemspec . "\n";
 
+# Directory manipulation
+
 sub reset_dir {
   my $directory = shift;
   if ( -d $directory ) {
@@ -39,8 +42,26 @@ sub reset_dir {
   make_path $directory;
 }
 
+# Gem manipulation
+sub unpack_gem {
+  my $gem_filepath = shift;
+  system("gem unpack $gem_filepath --target $target_dir");
+}
+
+sub fetch_gem {
+  my $gem_filepath = shift;
+  my $gem_version = shift;
+  if (! -e $gem_filepath ) {
+    my $cmd = "gem fetch " . $gem->{name} . " --version ${gem_version}" .
+              " --source $gem->{source}";
+    `$cmd`;
+    move( $gem->{name}. '-' . $gem_version . "gem", $gem_filepath );
+  }
+}
+
 sub main {
-  reset_dir $pkg_dir
+  reset_dir $pkg_dir;
+  fetch_gem("$pkg_dir/jsonschema_serializer-0.0.5.gem", "0.0.5");
 }
 
 main;
