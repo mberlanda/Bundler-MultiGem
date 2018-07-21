@@ -61,8 +61,11 @@ sub fetch_gem {
 sub main {
   reset_dir $target_dir;
 
+  my $gem_name = $gem->{name};
+  my $gem_main_module = $gem->{main_module};
+
   foreach my $v (@{$gem->{versions}}) {
-    my $gem_vname = join('-', ($gem->{name}, $v));
+    my $gem_vname = join('-', ($gem_name, $v));
     my $gem_path = "$pkg_dir/${gem_vname}.gem";
     my $extracted_dir = "${target_dir}/${gem_vname}";
     print $gem_path . "\n";
@@ -77,10 +80,32 @@ sub main {
     print $v . "\n";
     print $norm_v . "\n";
 
-    my $new_gem_name = join('-', ("v${norm_v}", $gem->{name}));
-    my $new_gem_main_module = join('::', ("V${norm_v}", $gem->{main_module}));
+    my $new_gem_name = join('-', ("v${norm_v}", $gem_name));
+    my $new_gem_main_module = join('::', ("V${norm_v}", $gem_main_module));
     print $new_gem_name . "\n";
     print $new_gem_main_module . "\n";
+
+    chdir("${extracted_dir}") || die "$!";
+    # Process .gemspec
+    open(GEMSPEC, "<${gem_name}.gemspec") ||
+      die "Can't open ${gem_name}.gem: $!";
+    open(NEW_GEMSPEC, ">${new_gem_name}.gemspec")  ||
+      die "Can't open ${new_gem_name}.gem: $!";
+
+    while( my $line = <GEMSPEC> ){
+      # Replace version reference from file
+      if ( $line =~ /${gem_name}\/version/ ) { next; }
+      $line =~ s/${gem_main_module}::VERSION/'$v'/;
+
+      $line =~ s/${gem_name}/$new_gem_name/g;
+      $line =~ s/${gem_main_module}/$new_gem_main_module/g;
+
+      print NEW_GEMSPEC $line;
+    }
+    close(GEMSPEC);
+    close(NEW_GEMSPEC);
+
+    unlink "${gem_name}.gemspec" || warn "Could not unlink ${gem_name}.gemspec: $!";
   }
 }
 
