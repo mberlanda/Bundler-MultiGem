@@ -3,9 +3,9 @@ use 5.006;
 use strict;
 use warnings;
 
-use Cwd qw(cwd);
+use Cwd qw( cwd );
 use File::Path qw( make_path remove_tree );
-use File::Copy qw(move);
+use File::Copy qw( move );
 
 # Directories
 my $root_path = cwd();
@@ -64,10 +64,23 @@ sub main {
   foreach my $v (@{$gem->{versions}}) {
     my $gem_vname = join('-', ($gem->{name}, $v));
     my $gem_path = "$pkg_dir/${gem_vname}.gem";
+    my $extracted_dir = "${target_dir}/${gem_vname}";
     print $gem_path . "\n";
+    print $extracted_dir . "\n";
 
     fetch_gem($gem_path, $v, $gem_vname);
     unpack_gem($gem_path);
+
+    # Normalize version name without dots
+    my $norm_v;
+    ($norm_v = $v) =~ s/\.//g;
+    print $v . "\n";
+    print $norm_v . "\n";
+
+    my $new_gem_name = join('-', ("v${norm_v}", $gem->{name}));
+    my $new_gem_main_module = join('::', ("V${norm_v}", $gem->{main_module}));
+    print $new_gem_name . "\n";
+    print $new_gem_main_module . "\n";
   }
 }
 
