@@ -57,17 +57,12 @@ function process_gem_version {
 
   NORMALIZED_VERSION=${GEM_VERSION//./}
 
-  GEM_DIR=$(echo ${GEM_VERSION} | sed 's/.gem//' | sed 's~pkg/~~')
-  VERSION=$(echo ${GEM_DIR} | sed 's/zenrializer-//')
-
-
   unpack_gem ${GEM_FILEPATH}
   EXTRACTED_DIR="${TARGET_DIR}/${GEM_VNAME}"
   cd "${EXTRACTED_DIR}"
 
   NEW_GEM_NAME="v${NORMALIZED_VERSION}-${GEM_NAME}"
   NEW_GEM_MAIN_MODULE="V${NORMALIZED_VERSION}::${GEM_MAIN_MODULE}"
-  NEW_MODULE="V${NORMALIZED_VERSION}::Zenrializer"
 
   echo -e "Processing .gemspec"
 
