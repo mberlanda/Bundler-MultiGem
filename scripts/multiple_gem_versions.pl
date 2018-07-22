@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Cwd qw( cwd );
+use File::Find;
 use File::Path qw( make_path remove_tree );
 use File::Spec::Functions qw( catfile catdir );
 
@@ -65,8 +66,6 @@ sub main {
     # Normalize version name without dots
     my $norm_v;
     ($norm_v = $v) =~ s/\.//g;
-    print $v . "\n";
-    print $norm_v . "\n";
 
     my $new_main_module = "V${norm_v}";
     my $new_gem_name = join('-', ("v${norm_v}", $gem_name));
@@ -109,16 +108,45 @@ sub main {
       open(NEW_FILE, ">${new_main_module_file}")  ||
         die "Can't open ${new_main_module_file}: $!";
       print NEW_FILE "module ${new_main_module}; end\n";
-      foreach my $line (@file_content) {
-        $line =~ s/${gem_name}/$new_gem_name/g;
-        $line =~ s/${gem_main_module}/$new_gem_main_module/g;
-        print NEW_FILE $line;
-      }
+      foreach my $line (@file_content) { print NEW_FILE $line; }
       close(NEW_FILE);
 
       unlink $main_module_file;
     }
-    rename( catdir( $lib_dir, $gem_name ), catdir( $lib_dir, $new_gem_name ));
+
+    # Rename gem name dir in lib directory
+    rename( catdir( $lib_dir, $gem_name ), catdir( $lib_dir, $new_gem_name )) ||
+     warn catdir( $lib_dir, $gem_name ) . "does not exists: $!";
+
+    # Process all rb files in $extracted_dir
+    my @ruby_files = ();
+    find(
+      {
+        wanted => sub {
+            my $F = $File::Find::name;
+            push @ruby_files, $F if ($F =~ /rb$/)
+          },
+        no_chdir => 1
+      },
+      $extracted_dir
+    );
+
+    foreach my $f (@ruby_files) {
+      my $bkp = $f . ".bak";
+      rename($f, $bkp);
+      open(I, "<$bkp");
+      open(O, ">$f");
+      while(my $line = <I>) {
+        $line =~ s/${gem_name}/$new_gem_name/g;
+        $line =~ s/${gem_main_module}/$new_gem_main_module/g;
+        print O $line;
+      }
+      close(O);
+      close(I);
+      unlink $bkp;
+    }
+
+    print $gem_vname . " completed!\n";
   }
 }
 
