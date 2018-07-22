@@ -18,8 +18,8 @@ my $builder = Module::Build->new(
     requires => {
         'Cwd'            => '3.62',
         'File::Basename' => '2.85',
-        'File::Copy'     => '2.30',
         'File::Path'     => '2.15',
+        'File::Spec'     => '3.62',
     },
     add_to_cleanup     => [ 'Bundler-MultiGem-*' ],
 );

@@ -5,16 +5,12 @@ use warnings;
 
 use Cwd qw( cwd );
 use File::Path qw( make_path remove_tree );
-use File::Copy qw( move );
+use File::Spec::Functions qw( catfile catdir );
 
 # Directories
 my $root_path = cwd();
-my $target_dir = "${root_path}/versions";
-my $pkg_dir = "${root_path}/pkg";
-
-print $root_path . "\n";
-print $target_dir . "\n";
-print $pkg_dir . "\n";
+my $target_dir = catdir( $root_path, "versions" );
+my $pkg_dir = catdir( $root_path, "pkg" );
 
 # https://rubygems.org/downloads/jsonschema_serializer-0.1.0.gem
 my $gem = {
@@ -24,20 +20,13 @@ my $gem = {
   versions => [qw( 0.0.5 0.1.0 )]
 };
 
-print $gem->{source} . "\n";
-print $gem->{name} . "\n";
-print $gem->{main_module} . "\n";
-print join(', ', @{$gem->{versions}}) . "\n";
-
 my $gemspec = $gem->{name} . ".gemspec";
-print $gemspec . "\n";
 
 # Directory manipulation
-
 sub reset_dir {
   my $directory = shift;
   if ( -d $directory ) {
-    remove_tree $directory or die "Failed to remove path: $directory";
+    remove_tree $directory || die "Failed to remove path: $directory: $!";
   }
   make_path $directory;
 }
@@ -53,23 +42,22 @@ sub fetch_gem {
   if (! -f $gem_filepath ) {
     my $cmd = "gem fetch " . $gem->{name} . " --version ${gem_version}" .
               " --source $gem->{source}";
-    `$cmd`;
-    move( "${gem_vname}.gem", $gem_filepath );
+    system("$cmd");
+    rename( "${gem_vname}.gem", $gem_filepath );
   }
 }
 
 sub main {
   reset_dir $target_dir;
+  reset_dir $pkg_dir;
 
   my $gem_name = $gem->{name};
   my $gem_main_module = $gem->{main_module};
 
   foreach my $v (@{$gem->{versions}}) {
     my $gem_vname = join('-', ($gem_name, $v));
-    my $gem_path = "$pkg_dir/${gem_vname}.gem";
-    my $extracted_dir = "${target_dir}/${gem_vname}";
-    print $gem_path . "\n";
-    print $extracted_dir . "\n";
+    my $gem_path = catfile( $pkg_dir, "${gem_vname}.gem" );
+    my $extracted_dir = catdir( $target_dir,  $gem_vname );
 
     fetch_gem($gem_path, $v, $gem_vname);
     unpack_gem($gem_path);
@@ -80,21 +68,20 @@ sub main {
     print $v . "\n";
     print $norm_v . "\n";
 
+    my $new_main_module = "V${norm_v}";
     my $new_gem_name = join('-', ("v${norm_v}", $gem_name));
-    my $new_gem_main_module = join('::', ("V${norm_v}", $gem_main_module));
-    print $new_gem_name . "\n";
-    print $new_gem_main_module . "\n";
+    my $new_gem_main_module = join('::', ($new_main_module, $gem_main_module));
 
-    chdir("${extracted_dir}") || die "$!";
+    my $gemspec = catfile($extracted_dir, "${gem_name}.gemspec");
+    my $new_gemspec = catfile($extracted_dir, "${new_gem_name}.gemspec");
+
     # Process .gemspec
-    open(GEMSPEC, "<${gem_name}.gemspec") ||
-      die "Can't open ${gem_name}.gem: $!";
-    open(NEW_GEMSPEC, ">${new_gem_name}.gemspec")  ||
-      die "Can't open ${new_gem_name}.gem: $!";
+    open(GEMSPEC, "<${gemspec}") || die "Can't open ${gemspec}: $!";
+    open(NEW_GEMSPEC, ">${new_gemspec}") || die "Can't open ${new_gemspec}: $!";
 
     while( my $line = <GEMSPEC> ){
-      # Replace version reference from file
       if ( $line =~ /${gem_name}\/version/ ) { next; }
+      # Replace version reference from file
       $line =~ s/${gem_main_module}::VERSION/'$v'/;
 
       $line =~ s/${gem_name}/$new_gem_name/g;
@@ -102,10 +89,36 @@ sub main {
 
       print NEW_GEMSPEC $line;
     }
-    close(GEMSPEC);
     close(NEW_GEMSPEC);
+    close(GEMSPEC);
 
-    unlink "${gem_name}.gemspec" || warn "Could not unlink ${gem_name}.gemspec: $!";
+    unlink $gemspec || warn "Could not unlink ${gemspec}: $!";
+
+
+    my $lib_dir = catdir( $extracted_dir, 'lib' );
+    # process main gem module
+    my $main_module_file = catfile( $lib_dir, "${gem_name}.rb" );
+    my $new_main_module_file = catfile( $lib_dir, "${new_gem_name}.rb" );
+
+    if ( -e $main_module_file ) {
+      open(ORIGINAL, "<${main_module_file}") ||
+        die "Can't open ${main_module_file}: $!";
+      my @file_content = <ORIGINAL>;
+      close(ORIGINAL);
+
+      open(NEW_FILE, ">${new_main_module_file}")  ||
+        die "Can't open ${new_main_module_file}: $!";
+      print NEW_FILE "module ${new_main_module}; end\n";
+      foreach my $line (@file_content) {
+        $line =~ s/${gem_name}/$new_gem_name/g;
+        $line =~ s/${gem_main_module}/$new_gem_main_module/g;
+        print NEW_FILE $line;
+      }
+      close(NEW_FILE);
+
+      unlink $main_module_file;
+    }
+    rename( catdir( $lib_dir, $gem_name ), catdir( $lib_dir, $new_gem_name ));
   }
 }
 
