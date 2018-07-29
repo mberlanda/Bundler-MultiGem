@@ -1,0 +1,17 @@
+# Mandatory options
+gem:
+  source: https://rubygems.org
+  name: jsonschema_serializer
+  main_module: JsonschemaSerializer
+  versions:
+    - '0.0.1'
+    - '0.1.0'
+# Accepted options
+directories:
+  root:
+  pkg:
+  target:
+# Cache options, if false it will destroy and recreate the folder
+cache:
+  pkg: 1
+  target: 0
