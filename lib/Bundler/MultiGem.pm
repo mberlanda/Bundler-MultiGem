@@ -3,6 +3,16 @@ package Bundler::MultiGem;
 use 5.006;
 use strict;
 use warnings;
+use App::Cmd::Setup -app;
+
+
+sub opt_spec {
+  my ( $class, $app ) = @_;
+  return (
+    [ 'help' => "this usage screen" ],
+    $class->options($app),
+  )
+}
 
 =head1 NAME
 

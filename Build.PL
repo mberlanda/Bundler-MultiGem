@@ -16,10 +16,11 @@ my $builder = Module::Build->new(
         'Test::More' => '0',
     },
     requires => {
-        'Cwd'            => '3',
-        'File::Find'     => '1',
-        'File::Path'     => '2',
-        'File::Spec'     => '3',
+        'App::Cmd'        => '0.331',
+        'Cwd'             => '3',
+        'File::Find'      => '1',
+        'File::Path'      => '2',
+        'File::Spec'      => '3',
     },
     add_to_cleanup     => [ 'Bundler-MultiGem-*' ],
 );
