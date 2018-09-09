@@ -5,15 +5,6 @@ use strict;
 use warnings;
 use App::Cmd::Setup -app;
 
-
-sub opt_spec {
-  my ( $class, $app ) = @_;
-  return (
-    [ 'help' => "this usage screen" ],
-    $class->options($app),
-  )
-}
-
 =head1 NAME
 
 Bundler::MultiGem - The great new Bundler::MultiGem!
@@ -38,25 +29,19 @@ Perhaps a little code snippet.
     my $foo = Bundler::MultiGem->new();
     ...
 
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
+=head2 opt_spec
 
 =cut
 
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
+sub opt_spec {
+  my ( $class, $app ) = @_;
+  return (
+    [ 'help' => "this usage screen" ],
+    $class->options($app),
+  )
 }
 
 =head1 AUTHOR
@@ -68,8 +53,6 @@ Mauro Berlanda, C<< <kupta at cpan.org> >>
 Please report any bugs or feature requests to C<bug-bundler-multigem at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Bundler-MultiGem>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
 
 
 =head1 SUPPORT

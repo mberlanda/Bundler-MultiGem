@@ -8,10 +8,11 @@ sub execute {
   print "Everything has been initialized.  (Not really.)\n";
 }
 
-sub usage_desc { "yourcmd %o [dbfile ...]" }
+sub usage_desc { "bundle-multigem %o [dbfile ...]" }
 
 sub opt_spec {
   return (
+    [ "skip-refs|R",  "skip reference checks during init", ],
     [ "skip-refs|R",  "skip reference checks during init", ],
     [ "values|v=s@",  "starting values", { default => [ 0, 1, 3 ] } ],
   );

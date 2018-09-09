@@ -21,6 +21,7 @@ my $builder = Module::Build->new(
         'File::Find'      => '1',
         'File::Path'      => '2',
         'File::Spec'      => '3',
+        'YAML::Tiny'      => '1.73'
     },
     add_to_cleanup     => [ 'Bundler-MultiGem-*' ],
 );
