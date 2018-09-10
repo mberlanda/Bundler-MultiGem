@@ -33,8 +33,8 @@ This module contains a default configuration for the package to work and the uti
     },
     'directories' => {
       'root' => undef,
-      'pkg' => undef,
-      'target' => undef
+      'pkg' => 'pkg',
+      'target' => 'versions'
     },
     'cache' => {
       'pkg' => 1,
