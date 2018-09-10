@@ -50,6 +50,28 @@ This module contains a default configuration for the package to work and the uti
   sub merge_configuration {
     my $custom_config = shift;
     my $result = merge($custom_config, dclone($DEFAULT_CONFIGURATION));
+    default_main_module($result);
+  }
+
+=head2 merge_configuration
+
+=cut
+  sub default_main_module {
+    my $custom_config = shift;
+    my $gem_config = $custom_config->{gem};
+    if ( !defined $gem_config->{main_module}) {
+      $gem_config->{main_module} = ruby_constantize($gem_config->{name});
+    }
+    $custom_config
+  }
+
+=head2 ruby_constantize
+
+=cut
+  sub ruby_constantize {
+    my $name = shift;
+    $name;
   }
 };
+
 1;
