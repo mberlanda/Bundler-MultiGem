@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 18;
+use Test::More tests => 20;
 use Test::Deep;
 
 BEGIN {
@@ -50,6 +50,30 @@ ok( defined &ruby_constantize, 'ruby_constantize() is defined' );
   is_deeply(
   	$gem_config->{versions}, [qw(0.0.5 0.1.0)], 'merge_configuration: gem->versions'
   );
+}
+
+# default_main_module context
+{
+  my $f = \&Bundler::MultiGem::Utl::InitConfig::default_main_module;
+  my $main_module_test = sub {
+  	$f->(shift)->{gem}->{main_module};
+  };
+
+  my $missing_config = {
+    'gem' => {
+      'name' => 'jsonschema_serializer',
+      'versions' => [qw(0.0.5 0.1.0)]
+    }
+  };
+  my $provided_config = {
+    'gem' => {
+      'name' => 'rspec',
+      'main_module' => 'RSpec',
+      'versions' => [qw(0.0.5 0.1.0)]
+    }
+  };
+  is_deeply($main_module_test->($missing_config), "JsonschemaSerializer", 'default_main_module: main_module not provided');
+  is_deeply($main_module_test->($provided_config), "RSpec", 'default_main_module: main_module provided');
 }
 
 # ruby_constantize context
