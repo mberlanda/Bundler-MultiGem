@@ -4,10 +4,11 @@ package Bundler::MultiGem::Utl::InitConfig {
   use warnings;
 
   use Exporter qw(import);
-  our @EXPORT = qw();
+  our @EXPORT = qw(ruby_constantize);
 
-  use Storable qw(dclone);
+  use Storable qw(dclone dclone);
   use Hash::Merge qw(merge);
+  use common::sense;
 
 =head1 NAME
 
@@ -70,7 +71,11 @@ This module contains a default configuration for the package to work and the uti
 =cut
   sub ruby_constantize {
     my $name = shift;
-    $name;
+    for ($name) {
+      s/_(\w)/\U$1/g;
+      s/-(\w)/::\U$1/g;
+    }
+    ucfirst $name;
   }
 };
 

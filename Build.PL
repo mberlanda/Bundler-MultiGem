@@ -18,6 +18,7 @@ my $builder = Module::Build->new(
     },
     requires => {
         'App::Cmd'        => '0.331',
+        'common::sense'    => '3',
         'Cwd'             => '3',
         'File::Find'      => '1',
         'File::Path'      => '2',

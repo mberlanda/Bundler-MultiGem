@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 14;
+use Test::More tests => 18;
 use Test::Deep;
 
 BEGIN {
@@ -15,7 +15,7 @@ diag( "Testing Bundler::MultiGem::Utl::InitConfig, Perl $], $^X" );
 ok( defined ${Bundler::MultiGem::Utl::InitConfig::DEFAULT_CONFIGURATION}, '$DEFAULT_CONFIGURATION is defined' );
 ok( defined &Bundler::MultiGem::Utl::InitConfig::merge_configuration, 'merge_configuration() is defined' );
 ok( defined &Bundler::MultiGem::Utl::InitConfig::default_main_module, 'default_main_module() is defined' );
-ok( defined &Bundler::MultiGem::Utl::InitConfig::ruby_constantize, 'ruby_constantize() is defined' );
+ok( defined &ruby_constantize, 'ruby_constantize() is defined' );
 
 # DEFAULT_CONFIGURATION context
 {
@@ -25,7 +25,7 @@ ok( defined &Bundler::MultiGem::Utl::InitConfig::ruby_constantize, 'ruby_constan
   );
 
   my $gem_config = $config->{gem};
-  ok($gem_config->{source}, "https://rubygems.org");
+  is_deeply($gem_config->{source}, "https://rubygems.org", 'DEFAULT_CONFIGURATION->gem->name undef');
   ok(! defined $gem_config->{name}, 'DEFAULT_CONFIGURATION->gem->name undef');
   ok(! defined $gem_config->{main_module}, 'DEFAULT_CONFIGURATION->gem->main_module undef');
   is_deeply(
@@ -44,10 +44,18 @@ ok( defined &Bundler::MultiGem::Utl::InitConfig::ruby_constantize, 'ruby_constan
   my $actual = Bundler::MultiGem::Utl::InitConfig::merge_configuration($custom_config);
 
   my $gem_config = $actual->{gem};
-  ok($gem_config->{source}, "https://rubygems.org");
-  ok($gem_config->{name}, "jsonschema_serializer");
-  ok($gem_config->{main_module}, "jsonschema_serializer");
+  is_deeply($gem_config->{source}, "https://rubygems.org", 'merge_configuration: gem->source');
+  is_deeply($gem_config->{name}, "jsonschema_serializer", 'merge_configuration: gem->name');
+  is_deeply($gem_config->{main_module}, "JsonschemaSerializer", 'merge_configuration: gem->main_module');
   is_deeply(
-  	$gem_config->{versions}, [qw(0.0.5 0.1.0)], 'DEFAULT_CONFIGURATION->gem->versions empty'
+  	$gem_config->{versions}, [qw(0.0.5 0.1.0)], 'merge_configuration: gem->versions'
   );
+}
+
+# ruby_constantize context
+{
+  is_deeply(ruby_constantize('rails'), 'Rails', 'ruby_constantize: rails');
+  is_deeply(ruby_constantize('jsonschema_serializer'), 'JsonschemaSerializer', 'ruby_constantize: jsonschema_serializer');
+  is_deeply(ruby_constantize('foo-bar'), 'Foo::Bar', 'ruby_constantize: foo-bar');
+  is_deeply(ruby_constantize('foo-bar_baz'), 'Foo::BarBaz', 'ruby_constantize: foo-bar_baz');
 }
