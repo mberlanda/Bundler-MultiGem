@@ -8,7 +8,7 @@ package Bundler::MultiGem::Command::initialize {
   use YAML::Tiny;
 =head1 NAME
 
-Bundler::MultiGem::Command::initialize - The utility to install multiple versions of the same ruby gem
+Bundler::MultiGem::Command::initialize - Generate a configuration file (alias: init)
 
 =head1 VERSION
 
@@ -19,6 +19,14 @@ Version 0.01
 This module the commands to initialize a yml configuration file for installing multiple versions of the same gem
 
 =head1 SUBROUTINES/METHODS
+
+=head2 command_names
+
+=cut
+
+  sub command_names {
+    qw(initialize init)
+  }
 
 =head2 execute
 

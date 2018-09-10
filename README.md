@@ -22,7 +22,7 @@ This will make available the command `bundle-multigem`
 
 ### Initialize
 
-The first command you can ran is `initialize`.
+The first command you can run is `initialize` or `init`.
 
 This takes a `path` as parameter and the following options:
 
