@@ -4,7 +4,7 @@ package Bundler::MultiGem::Utl::InitConfig {
   use warnings;
 
   use Exporter qw(import);
-  our @EXPORT = qw(ruby_constantize);
+  our @EXPORT = qw(ruby_constantize merge_configuration);
 
   use Storable qw(dclone dclone);
   use Hash::Merge qw(merge);
