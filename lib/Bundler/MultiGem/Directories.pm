@@ -46,18 +46,18 @@ if you don't export anything, such as for a purely object-oriented module.
 sub mk_dir {
   my $dir = shift;
   if ( !-d $dir ) {
-    make_path $dir or die "Failed to create path: $dir";
+    make_path $dir or die "Failed to create path: ${dir}";
   }
 }
 
-=head2 rm_dir
+=head2 rm_{dir}
 
 =cut
 
 sub rm_dir {
   my $dir = shift;
   if ( -d $dir ) {
-    remove_tree $dir or die "Failed to remove path: $dir";
+    remove_tree $dir or die "Failed to remove path: ${dir}";
   }
 }
 
