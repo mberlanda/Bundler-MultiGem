@@ -63,9 +63,12 @@ This module includes the commands to create multiple versions of the same gem ou
     my $yaml = YAML::Tiny->read($opt->{file});
 
 	my $gem = Bundler::MultiGem::Model::Gem->new($yaml->[0]{gem});
-	$gem->set_dirs($yaml->[0]{directories});
+	my $dir = Bundler::MultiGem::Model::Directories->new({
+		cache => $yaml->[0]{cache},
+		directories => $yaml->[0]{directories},
+	};
 
-	my $cache =  $yaml->[0]{cache};
+	$dir->validates;
 
 	print Dumper($gem);
 
