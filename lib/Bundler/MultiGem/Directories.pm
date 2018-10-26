@@ -17,7 +17,7 @@ Version 0.01
 our $VERSION = '0.01';
 
 use Exporter qw(import);
-our @EXPORT = qw()
+our @EXPORT = qw(mk_dir rm_dir)
 
 use File::Path qw( make_path remove_tree );
 

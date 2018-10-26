@@ -16,7 +16,7 @@ Version 0.01
 
 =head1 SYNOPSIS
 
-This module the commands to initialize a yml configuration file for installing multiple versions of the same gem
+This module includes the commands to initialize a yml configuration file for installing multiple versions of the same gem
 
 =head1 SUBROUTINES/METHODS
 
@@ -25,7 +25,7 @@ This module the commands to initialize a yml configuration file for installing m
 =cut
 
   sub command_names {
-    qw(initialize init)
+    qw(initialize init bootstrap b)
   }
 
 =head2 execute
@@ -62,7 +62,7 @@ This module the commands to initialize a yml configuration file for installing m
 
   sub usage_desc { "bundle-multigem %o <path>" }
 
-=head2 usage_desc
+=head2 opt_spec
 
 =cut
 
@@ -71,7 +71,7 @@ This module the commands to initialize a yml configuration file for installing m
       [ "gem-main-module|gm=s", "provide the gem main module (default: constantize --gem-name)" ],
       [ "gem-name|gn=s", "provide the gem name" ],
       [ "gem-source|gs=s", "provide the gem source (default: https://rubygems.org)" ],
-      [ "gem-versions|gv=s@", "provide the gem versions to install (e.g: --gem-versions 0.0.1 0.0.2)" ],
+      [ "gem-versions|gv=s@", "provide the gem versions to install (e.g: --gem-versions 0.0.1 --gem-versions 0.0.2)" ],
       [ "dir-pkg|dp=s", "directory for downloaded gem pkg (default: pkg)" ],
       [ "dir-target|dt=s", "directory for extracted versions (default: versions)" ],
       [ "cache-pkg|cp=s", "keep cache of pkg directory (default: 1)" ],
@@ -80,7 +80,7 @@ This module the commands to initialize a yml configuration file for installing m
     );
   }
 
-=head2 usage_desc
+=head2 validate_args
 
 =cut
   sub validate_args {
