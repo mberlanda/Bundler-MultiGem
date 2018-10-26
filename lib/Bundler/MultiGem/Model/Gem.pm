@@ -11,7 +11,7 @@ package Bundler::MultiGem::Model::Gem {
 
 =head1 NAME
 
-Bundler::MultiGem::Utl::Gem - The utility to install multiple versions of the same ruby gem
+Bundler::MultiGem::Model::Gem - The utility to install multiple versions of the same ruby gem
 
 =head1 VERSION
 
@@ -21,7 +21,7 @@ Version 0.01
 
 This module contains utility functions for manipulating gems
 
-=head1 EXPORTS
+=head1 SUBROUTINES
 
 =head2 new
   Take config as argument
@@ -99,6 +99,8 @@ This module contains utility functions for manipulating gems
     }
     return Bundler::MultiGem::Model::Gem::gem_vmodule_name($self->main_module, $v);
   }
+
+=head1 EXPORTS
 
 =head2 gem_vname
 
