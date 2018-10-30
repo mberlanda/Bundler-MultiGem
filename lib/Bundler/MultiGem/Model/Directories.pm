@@ -7,7 +7,14 @@ package Bundler::MultiGem::Model::Directories {
   use constant REQUIRED_KEYS => qw(cache directories);
 =head1 NAME
 Bundler::MultiGem::Model::Directory - Manipulate directories and cache
+=
+head1 VERSION
 
+Version 0.01
+
+=cut
+
+our $VERSION = '0.01';
 =head1 SUBROUTINES
 =cut
 

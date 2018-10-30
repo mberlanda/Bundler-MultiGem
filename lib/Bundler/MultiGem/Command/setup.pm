@@ -7,11 +7,15 @@ package Bundler::MultiGem::Command::setup {
 
 =head1 NAME
 
-Bundler::MultiGem::Command::run - Run multigem command
+Bundler::MultiGem::Command::setup - Create multiple gem versions out of a configuration file (alias: install i s)
 
 =head1 VERSION
 
 Version 0.01
+
+=cut
+
+our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 

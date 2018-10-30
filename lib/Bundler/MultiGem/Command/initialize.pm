@@ -7,11 +7,15 @@ package Bundler::MultiGem::Command::initialize {
   use YAML::Tiny;
 =head1 NAME
 
-Bundler::MultiGem::Command::initialize - Generate a configuration file (alias: init)
+Bundler::MultiGem::Command::initialize - Generate a configuration file (alias: init bootstrap b)
 
 =head1 VERSION
 
 Version 0.01
+
+=cut
+
+our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 

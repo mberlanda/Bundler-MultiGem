@@ -7,7 +7,7 @@ use App::Cmd::Setup -app;
 
 =head1 NAME
 
-Bundler::MultiGem - The great new Bundler::MultiGem!
+Bundler::MultiGem - bundle-multigem utility for gem versions benchmarking
 
 =head1 VERSION
 
