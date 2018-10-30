@@ -1,4 +1,4 @@
-package Bundler::MultiGem::Util::Directories;
+package Bundler::MultiGem::Utl::Directories;
 
 use 5.006;
 use strict;

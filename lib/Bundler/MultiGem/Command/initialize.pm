@@ -2,7 +2,6 @@ package Bundler::MultiGem::Command::initialize {
 
   use Bundler::MultiGem -command;
   use Cwd qw(realpath);
-  use Data::Dumper qw(Dumper);
   use Bundler::MultiGem::Utl::InitConfig qw(merge_configuration);
   use File::Spec::Functions qw(catfile);
   use YAML::Tiny;

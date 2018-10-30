@@ -1,9 +1,8 @@
 package Bundler::MultiGem::Command::setup {
 
   use Bundler::MultiGem -command;
-  use Data::Dumper qw(Dumper);
   use YAML::Tiny;
-  use Bundler::MultiGem::Directories;
+  use Bundler::MultiGem::Model::Directories;
   use Bundler::MultiGem::Model::Gem;
 
 =head1 NAME
@@ -58,19 +57,19 @@ This module includes the commands to create multiple versions of the same gem ou
 
   sub execute {
     my ($self, $opt, $args) = @_;
-    print Dumper($opt);
 
     my $yaml = YAML::Tiny->read($opt->{file});
 
-	my $gem = Bundler::MultiGem::Model::Gem->new($yaml->[0]{gem});
-	my $dir = Bundler::MultiGem::Model::Directories->new({
-		cache => $yaml->[0]{cache},
-		directories => $yaml->[0]{directories},
-	};
+    my $gem = Bundler::MultiGem::Model::Gem->new($yaml->[0]{gem});
+    my $dir = Bundler::MultiGem::Model::Directories->new({
+      cache => $yaml->[0]{cache},
+      directories => $yaml->[0]{directories},
+    });
 
-	$dir->validates;
+    $dir->validates;
+    $dir->apply_cache;
 
-	print Dumper($gem);
+    $gem->apply($dir);
 
     print "Completed!";
   }
