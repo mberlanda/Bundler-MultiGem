@@ -1,4 +1,4 @@
-package Bundler::MultiGem::Directories;
+package Bundler::MultiGem::Utl::Directories;
 
 use 5.006;
 use strict;
@@ -6,7 +6,7 @@ use warnings;
 
 =head1 NAME
 
-Bundler::MultiGem::Directories - The great new Bundler::MultiGem::Directories!
+Bundler::MultiGem::Util::Directories - The great new Bundler::MultiGem::Directories!
 
 =head1 VERSION
 
@@ -17,7 +17,7 @@ Version 0.01
 our $VERSION = '0.01';
 
 use Exporter qw(import);
-our @EXPORT = qw()
+our @EXPORT = qw(mk_dir rm_dir);
 
 use File::Path qw( make_path remove_tree );
 
@@ -46,18 +46,18 @@ if you don't export anything, such as for a purely object-oriented module.
 sub mk_dir {
   my $dir = shift;
   if ( !-d $dir ) {
-    make_path $dir or die "Failed to create path: $dir";
+    make_path $dir or die "Failed to create path: ${dir}";
   }
 }
 
-=head2 rm_dir
+=head2 rm_{dir}
 
 =cut
 
 sub rm_dir {
   my $dir = shift;
   if ( -d $dir ) {
-    remove_tree $dir or die "Failed to remove path: $dir";
+    remove_tree $dir or die "Failed to remove path: ${dir}";
   }
 }
 

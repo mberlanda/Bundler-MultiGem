@@ -1,0 +1,15 @@
+---
+cache:
+  pkg: 1
+  target: 0
+directories:
+  pkg: pkg
+  root: /Users/mberlanda/Misc/Bundler-MultiGem
+  target: versions
+gem:
+  main_module: JsonschemaSerializer
+  name: jsonschema_serializer
+  source: https://rubygems.org
+  versions:
+    - 0.0.5
+    - 0.1.0
