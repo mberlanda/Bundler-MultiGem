@@ -24,8 +24,8 @@ our $VERSION = '0.01';
 Take config as argument
 =cut
 sub new {
-  my $class = shift;
-  my $self = shift // {};
+  my ($class, $self) = @_;
+  if (!defined $self) { $self = {}; }
   bless $self, $class;
   return $self;
 }

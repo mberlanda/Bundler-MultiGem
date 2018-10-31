@@ -52,7 +52,9 @@ sub opt_spec {
 sub validate_args {
   my ($self, $opt, $args) = @_;
 
-  $opt->{file} = $opt->{file} // '.bundle-multigem.yml';
+  if (!defined $opt->{file}) {
+    $opt->{file} = '.bundle-multigem.yml';
+  }
   if (!-f $opt->{file}){
     $self->usage_error("You should provide a valid path ($opt->{file} does not exists)");
   }
