@@ -3,6 +3,7 @@ package Bundler::MultiGem::Model::Directories;
 use 5.006;
 use strict;
 use warnings;
+
 use File::Spec::Functions qw(catpath);
 use Bundler::MultiGem::Utl::Directories qw(mk_dir rm_dir);
 use constant REQUIRED_KEYS => qw(cache directories);

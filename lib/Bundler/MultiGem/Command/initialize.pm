@@ -1,5 +1,9 @@
 package Bundler::MultiGem::Command::initialize;
 
+use 5.006;
+use strict;
+use warnings;
+
 use Bundler::MultiGem -command;
 use Cwd qw(realpath);
 use Bundler::MultiGem::Utl::InitConfig qw(merge_configuration);
@@ -17,6 +21,8 @@ Version 0.02
 =cut
 
 our $VERSION = '0.02';
+
+our $app = {};
 
 =head1 SYNOPSIS
 
@@ -71,7 +77,7 @@ sub execute {
 
   $app->{config} = merge_configuration($app->{config});
 
-  my $output_file = $opt->{conf-file} || ".bundle-multigem.yml";
+  my $output_file = $opt->{'conf-file'} || ".bundle-multigem.yml";
   my $yaml = YAML::Tiny->new( $app->{config} );
 
   if (! -f $output_file ) {

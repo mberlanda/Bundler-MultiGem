@@ -1,5 +1,9 @@
 package Bundler::MultiGem::Command::setup;
 
+use 5.006;
+use strict;
+use warnings;
+
 use Bundler::MultiGem -command;
 use YAML::Tiny;
 use Bundler::MultiGem::Model::Directories;
