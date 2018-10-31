@@ -18,7 +18,11 @@ Bundler::MultiGem::Model::Gem - The utility to install multiple versions of the 
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
+
+=cut
+
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -27,8 +31,23 @@ This module contains utility functions for manipulating gems
 =head1 SUBROUTINES
 
 =head2 new
-Take config as argument
+
+Takes an hash reference parameter. You should provide:
+  * C<name>: string, gem name in repository
+  * C<main_module>: string, gem main module name
+  * C<source>: string, e.g. C<"https://rubygems.org">
+  * C<versions>: array ref of strings, e.g. C<[qw( 0.0.5 0.1.0 )]>
+
+    my $config = {
+      name => "jsonschema_serializer",
+      main_module => "JsonschemaSerializer",
+      source => "https://rubygems.org",
+      versions => [qw( 0.0.5 0.1.0 )]
+    };
+    my $gem = Bundler::MultiGem::Model::Gem->new($config);
+
 =cut
+
 sub new {
   my $class = shift;
   my $self = { config => shift };
@@ -48,7 +67,11 @@ sub config {
 }
 
 =head2 name
-name getter
+
+C<name> getter
+
+    $gem->name; # "jsonschema_serializer"
+
 =cut
 sub name {
   my $self = shift;
@@ -56,7 +79,11 @@ sub name {
 }
 
 =head2 source
-source getter
+
+C<source> getter
+
+    $gem->source; # "https://rubygems.org"
+
 =cut
 sub source {
   my $self = shift;
@@ -64,7 +91,11 @@ sub source {
 }
 
 =head2 main_module
-main_module getter
+
+C<main_module> getter
+
+    $gem->main_module; # "JsonschemaSerializer"
+
 =cut
 sub main_module {
   my $self = shift;
@@ -72,7 +103,12 @@ sub main_module {
 }
 
 =head2 versions
-versions getter
+
+
+C<versions> getter
+
+    $gem->versions; # [qw( 0.0.5 0.1.0 )]
+
 =cut
 sub versions {
   my $self = shift;
@@ -80,7 +116,15 @@ sub versions {
 }
 
 =head2 vname
-vname getter e.g. v010-foo for gem 'foo', '0.1.0'
+
+C<vname> getter: combine gem name and version and format it
+  * C<v>: string, a gem version reference
+
+    $gem->name; # "jsonschema_serializer"
+    my $v = "0.0.5";
+    $gem->vname($v); # "v005-jsonschema_serializer"
+
+
 =cut
 
 sub vname {
@@ -92,7 +136,14 @@ sub vname {
 }
 
 =head2 vmodule_name
-vmodule_name getter e.g. V010::Foo for gem 'foo', '0.1.0'
+
+C<vmodule_name> getter: combine gem name and version and format it
+  * C<v>: string, a gem version reference
+
+    $gem->main_module; # "JsonschemaSerializer"
+    my $v = "0.0.5";
+    $gem->vmodule_name($v); # "V005::JsonschemaSerializer"
+
 =cut
 
 sub vmodule_name {
@@ -103,37 +154,23 @@ sub vmodule_name {
   return Bundler::MultiGem::Model::Gem::gem_vmodule_name($self->main_module, $v);
 }
 
-=head1 EXPORTS
-
-=head2 gem_vname
-
-=cut
-sub gem_vname {
-  my ($gem_name, $v) = @_;
-  join('-', (norm_v($v), $gem_name));
-}
-
-=head2 gem_vmodule_name
-=cut
-sub gem_vmodule_name {
-  my ($gem_module_name, $v) = @_;
-  ruby_constantize(join('-', (norm_v($v), $gem_module_name)));
-}
-
-=head2 norm_v
-
-Normalize version name
-
-=cut
-sub norm_v {
-  my $v = shift;
-  for ($v) {
-    s/\.//g;
-  }
-  "v${v}";
-}
-
 =head2 apply
+
+This function apply all the transformation to the gem versions to be reused in the same C<Gemfile>:
+  C<dir>, a C<Bundler::MultiGem::Model::Directories> instance
+
+For each gem version it will:
+  * fetch the gem version
+  * extract it into a target directory
+  * C<process_gemfile>
+  * C<rename_main_file>
+  * rename the lib directory including the version name
+  * for each C<rb>, C<rake> and C<Rakefile> apply C<process_single_file>
+
+Caveats:
+  * if you are renaming C<foo-bar> to C<V123::Foo::Bar>, also partial matches will be renamed: e.g. C<foo-bar_baz>
+  * this is intended for benchmarking simple gems, it may break with very complex gems
+  * the use case leading this development was benchmarking serialization gems performance
 =cut
 
 sub apply {
@@ -160,7 +197,7 @@ sub apply {
     rename( catdir( $lib_dir, $self->name ), catdir( $lib_dir, $gem_vname )) ||
       warn catdir( $lib_dir, $self->name ) . "does not exists: $!";
 
-    # Process all rb files in $extracted_dir, this should be refined later
+    # Process all ruby files
     my @ruby_files = ();
     find(
       {
@@ -185,7 +222,17 @@ sub apply {
   foreach (@gemfile_statements) { print "$_\n"; }
 }
 
+
 =head2 process_gemfile
+
+Manipulates original gemfile as follows:
+  * rename C<foo.gemspec> for v C<0.1.0> into C<v010-foo.gemspec>
+  * remove line importing gem version (usually C<require_relative 'lib/foo/version'>)
+  * replace main_module version with the actual version (C<Foo::VERSION> with C<'0.1.0'>)
+  * replace gem name reference with gem vname (C<foo> with C<v010-foo>)
+  * replace gem main_module reference with gem vmodule_name (C<Foo> with C<V010::Foo>)
+  * unlink the original C<foo.gemspec>
+
 =cut
 
 sub process_gemfile {
@@ -218,6 +265,15 @@ sub process_gemfile {
 }
 
 =head2 rename_main_file
+
+Manipulates original gemfile as follows:
+  * rename C<lib/foo.rb> for v C<0.1.0> into C<lib/v010-foo.rb>
+  * add on top of C<lib/v010-foo.rb>: C<module V010; end> for namespacing
+  * copy the rest of original below
+
+This step allows to add a namespace with the gem version (a kind of shading).
+All the other replacement are done with other rb, rake and Rakfile files.
+
 =cut
 
 sub rename_main_file {
@@ -246,7 +302,15 @@ sub rename_main_file {
 }
 
 =head2 process_single_file
+
+Manipulates each file as follows:
+  * create a backup of the original file C<.bak>
+  * replace gem name reference with gem vname (C<foo> with C<v010-foo>)
+  * replace gem main_module reference with gem vmodule_name (C<Foo> with C<V010::Foo>)
+  * unlink the backup C<.bak>
+
 =cut
+
 sub process_single_file {
   my ($self, $v, $f) = @_;
 
@@ -269,15 +333,15 @@ sub process_single_file {
   unlink $bkp;
 }
 
-=head2 unpack_gem
-=cut
+=head2 fetch
 
-sub unpack_gem {
-  my ($gem_filepath, $target_dir) = @_;
-  system("gem unpack ${gem_filepath} --target ${target_dir}");
-}
+This is an alias of the system command C<gem fetch>
 
-=head2 fetch_gem
+    my $gem->name; # "foo"
+    my $fp = "pkg/v010-foo.gem"
+    my $gv = "0.1.0";
+    $gem->fetch($fp, $gv); # if $fp found, do nothing, else fetch gem version and rename it
+
 =cut
 
 sub fetch {
@@ -289,5 +353,146 @@ sub fetch {
     rename( $self->name . "-$gv" . ".gem", $fp );
   }
 }
+
+=head1 EXPORTS
+
+=head2 gem_vname
+
+Reusable function to combine and format gem name and version
+
+    use Bundler::MultiGem::Model::Gem qw(gem_vname);
+    gem_vname("foo", "0.1.0"); # v010-foo
+    gem_vname("foo_bar", "0.1.0"); # v010-foo_bar
+    gem_vname("foo-bar", "0.1.0"); # v010-foo-bar
+
+=cut
+
+sub gem_vname {
+  my ($gem_name, $v) = @_;
+  join('-', (norm_v($v), $gem_name));
+}
+
+=head2 gem_vmodule_name
+
+Reusable function to combine and format gem main module and version
+
+    use Bundler::MultiGem::Model::Gem qw(gem_vmodule_name);
+    gem_vname("Foo", "0.1.0"); # V010::Foo
+    gem_vname("FooBar", "0.1.0"); # V010::FooBar
+    gem_vname("Foo::Bar", "0.1.0"); # V010::Foo::Bar
+
+=cut
+sub gem_vmodule_name {
+  my ($gem_module_name, $v) = @_;
+  ruby_constantize(join('-', (norm_v($v), $gem_module_name)));
+}
+
+=head2 norm_v
+
+Utility function to normalize version name
+
+    use Bundler::MultiGem::Model::Gem qw(norm_v);
+    norm_v("123"); #v123
+    norm_v("1.23"); #v123
+    norm_v("12.3"); #v123
+    norm_v("1.2.3"); #v123
+=cut
+
+sub norm_v {
+  my $v = shift;
+  for ($v) {
+    s/\.//g;
+  }
+  "v${v}";
+}
+
+=head2 unpack_gem
+
+This is an alias of the system command C<gem unpack>
+
+=cut
+
+sub unpack_gem {
+  my ($gem_filepath, $target_dir) = @_;
+  system("gem unpack ${gem_filepath} --target ${target_dir}");
+}
+
+=head1 AUTHOR
+
+Mauro Berlanda, C<< <kupta at cpan.org> >>
+
+=head1 BUGS
+
+Please report any bugs or feature requests to L<https://github.com/mberlanda/Bundler-MultiGem/issues>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=.>. I will be notified, and then you'll
+automatically be notified of progress on your bug as I make changes.
+
+=head1 SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc Bundler::MultiGem::Directories
+
+
+You can also look for information at:
+
+=over 2
+
+=item * RT: CPAN's request tracker (report bugs here)
+
+L<https://rt.cpan.org/Public/Dist/Display.html?Name=Bundler-MultiGem>
+
+=item * Github Repository
+
+L<https://github.com/mberlanda/Bundler-MultiGem>
+
+=back
+
+
+=head1 ACKNOWLEDGEMENTS
+
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2018 Mauro Berlanda.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the the Artistic License (2.0). You may obtain a
+copy of the full license at:
+
+L<http://www.perlfoundation.org/artistic_license_2_0>
+
+Any use, modification, and distribution of the Standard or Modified
+Versions is governed by this Artistic License. By using, modifying or
+distributing the Package, you accept this license. Do not use, modify,
+or distribute the Package, if you do not accept this license.
+
+If your Modified Version has been derived from a Modified Version made
+by someone other than you, you are nevertheless required to ensure that
+your Modified Version complies with the requirements of this license.
+
+This license does not grant you the right to use any trademark, service
+mark, tradename, or logo of the Copyright Holder.
+
+This license includes the non-exclusive, worldwide, free-of-charge
+patent license to make, have made, use, offer to sell, sell, import and
+otherwise transfer the Package with respect to any patent claims
+licensable by the Copyright Holder that are necessarily infringed by the
+Package. If you institute patent litigation (including a cross-claim or
+counterclaim) against any party alleging that the Package constitutes
+direct or contributory patent infringement, then this Artistic License
+to you shall terminate on the date that such litigation is filed.
+
+Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER
+AND CONTRIBUTORS "AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
+THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY
+YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
+CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
+CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+=cut
 
 1;
