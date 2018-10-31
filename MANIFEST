@@ -9,7 +9,7 @@ lib/Bundler/MultiGem/Model/Gem.pm
 lib/Bundler/MultiGem/Utl/Directories.pm
 lib/Bundler/MultiGem/Utl/InitConfig.pm
 MANIFEST			This list of files
-README.md
+README
 t/00-load.t
 t/Bundler-MultiGem-Command-initialize.t
 t/Bundler-MultiGem-Command-setup.t
