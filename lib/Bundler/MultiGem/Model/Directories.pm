@@ -8,20 +8,35 @@ use Bundler::MultiGem::Utl::Directories qw(mk_dir rm_dir);
 use constant REQUIRED_KEYS => qw(cache directories);
 
 =head1 NAME
+
 Bundler::MultiGem::Model::Directory - Manipulate directories and cache
-=
-head1 VERSION
 
-Version 0.01
+=head1 VERSION
+
+Version 0.02
 
 =cut
+our $VERSION = '0.02';
 
-our $VERSION = '0.01';
+=head1 SYNOPSIS
+
+This package contain an object to manipulate directories and cache
+
 =head1 SUBROUTINES
-=cut
 
 =head2 new
-Take config as argument
+
+Takes an optional hash reference parameter
+
+    my $empty = Bundler::MultiGem::Model::Directories->new(); # {}
+
+    my $config = {
+      foo => 'bar',
+      cache => [],
+      directories => [],
+    };
+    my $foo = Bundler::MultiGem::Model::Directories->new($config);
+
 =cut
 sub new {
   my ($class, $self) = @_;
@@ -31,7 +46,12 @@ sub new {
 }
 
 =head2 validates
-Validates current configuration
+
+C<validates> current configuration to contain REQUIRED_KEYS:
+
+     use constant REQUIRED_KEYS => qw(cache directories);
+     $dir->validates;
+
 =cut
 sub validates {
   my $self = shift;
@@ -45,7 +65,14 @@ sub validates {
 }
 
 =head2 cache
-cache getter
+
+C<cache> getter: if no arguments, return an hash reference
+
+    $dir->{cache} = { foo => 1 };
+    $dir->cache; # { foo => 1 }
+    $dir->cache('foo'); # 'bar'
+    $dir->cache('baz'); # undef
+
 =cut
 sub cache {
   my ($self, $key) = @_;
@@ -56,8 +83,16 @@ sub cache {
 }
 
 =head2 dirs
-dirs getter
+
+C<dirs> getter: if no arguments, return an hash reference
+
+    $dir->{directories} = { foo => 'bar/' };
+    $dir->dirs; # { foo => 'bar/' }
+    $dir->dirs('foo'); # '/root/bar'
+    $dir->dirs('baz'); # undef
+
 =cut
+
 sub dirs {
   my ($self, $key) = @_;
   if (!defined $key) {
@@ -70,7 +105,15 @@ sub dirs {
 }
 
 =head2 apply_cache
-  apply_cache current configuration
+
+C<apply_cache> handle configuration cache on the folder:
+
+    $dir->cache('foo'); # 1
+    $dir->dirs('foo'); # creates foo dir if not existing
+
+    $dir->cache('bar'); # 0
+    $dir->dirs('bar'); # deletes bar dir if existing and recreate it
+
 =cut
 sub apply_cache {
   my $self = shift;
