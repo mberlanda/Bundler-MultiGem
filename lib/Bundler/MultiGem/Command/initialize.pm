@@ -12,19 +12,42 @@ Bundler::MultiGem::Command::initialize - Generate a configuration file (alias: i
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
 This module includes the commands to initialize a yml configuration file for installing multiple versions of the same gem
 
-=head1 SUBROUTINES/METHODS
+    bundle-multigem [-f] [long options...] <path>
+
+      --gm --gem-main-module    provide the gem main module (default:
+                                constantize --gem-name)
+      --gn --gem-name           provide the gem name
+      --gs --gem-source         provide the gem source (default:
+                                https://rubygems.org)
+      --gv --gem-versions       provide the gem versions to install (e.g:
+                                --gem-versions 0.0.1 --gem-versions 0.0.2)
+      --dp --dir-pkg            directory for downloaded gem pkg (default:
+                                pkg)
+      --dt --dir-target         directory for extracted versions (default:
+                                versions)
+      --cp --cache-pkg          keep cache of pkg directory (default: 1)
+      --ct --cache-target       keep cache of target directory (default: 0)
+      -f --conf-file            choose config file name (default:
+                                .bundle-multigem.yml)
+
+
+Please note that the C<path> passed as argument will be considered as the root path for the project
+
+=head1 SUBROUTINES
 
 =head2 command_names
+
+Command aliases: C<initialize, init, bootstrap, b>
 
 =cut
 
@@ -87,6 +110,7 @@ sub opt_spec {
 =head2 validate_args
 
 =cut
+
 sub validate_args {
   my ($self, $opt, $args) = @_;
 
@@ -113,15 +137,24 @@ sub config {
   my $app = shift;
   $app->{config} ||= {};
 }
-=head2 config
-
-=cut
 
 our $OPT_PREFIX = {
   'gem' => 'gem',
   'dir' => 'directories',
   'cache' => 'cache'
 };
+
+=head2 opt_prefix
+
+Internal. Apply $OPT_PREFIX when collecting arguments
+
+    our $OPT_PREFIX = {
+      'gem' => 'gem',
+      'dir' => 'directories',
+      'cache' => 'cache'
+    };
+
+=cut
 
 sub opt_prefix {
   my $k = shift;
