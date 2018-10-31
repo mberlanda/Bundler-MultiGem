@@ -11,19 +11,27 @@ Bundler::MultiGem::Command::setup - Create multiple gem versions out of a config
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
 This module includes the commands to create multiple versions of the same gem out of a config yml file
 
+  bundle-multigem [-f] [long options...] <path>
+
+    -f --file     provide the yaml configuration file (default:
+                  ./.bundle-multigem.yml)
+
+
 =head1 SUBROUTINES/METHODS
 
 =head2 command_names
+
+Command aliases: C<setup, install, i, s>
 
 =cut
 
@@ -46,9 +54,11 @@ sub opt_spec {
     [ "file|f=s", "provide the yaml configuration file (default: ./.bundle-multigem.yml)" ],
   );
 }
+
 =head2 validate_args
 
 =cut
+
 sub validate_args {
   my ($self, $opt, $args) = @_;
 
@@ -60,6 +70,12 @@ sub validate_args {
   }
   $self->usage_error("No args allowed") if @$args;
 }
+
+=head2 execute
+
+Load the YAML configuration file, validates the directories provided and apply the gem creation
+
+=cut
 
 sub execute {
   my ($self, $opt, $args) = @_;
